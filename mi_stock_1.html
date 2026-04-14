@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Stock</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --green: #4ade80;
+  --green-bg: rgba(74,222,128,0.08);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251,191,36,0.08);
+  --red: #f87171;
+  --red-bg: rgba(248,113,113,0.08);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96,165,250,0.08);
+  --accent: #4ade80;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+}
+.app { max-width: 520px; margin: 0 auto; padding: 0 0 80px; }
+
+/* Header */
+.header {
+  padding: 20px 16px 0;
+  margin-bottom: 20px;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.logo span { color: var(--accent); }
+.dolar-chip {
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dolar-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* Nav */
+.nav {
+  display: flex;
+  padding: 0 16px;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 20px;
+  gap: 4px;
+}
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .15s;
+  letter-spacing: .01em;
+}
+.nav-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+.nav-btn:hover:not(.active) { color: var(--text2); }
+
+/* Sections */
+.section { display: none; padding: 0 16px; }
+.section.active { display: block; }
+
+/* Metric grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.metric {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+.metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.metric-value { font-size: 20px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.metric-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.metric.green .metric-value { color: var(--green); }
+.metric.blue .metric-value { color: var(--blue); }
+
+/* Section label */
+.sec-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+/* Brand cards */
+.brand-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand-name { font-size: 14px; font-weight: 500; }
+.brand-count { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.brand-gain { font-size: 15px; font-weight: 500; font-family: 'DM Mono', monospace; color: var(--green); }
+.brand-sub { font-size: 11px; color: var(--text3); text-align: right; }
+
+/* Filter chips */
+.filter-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.chip {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+}
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 500;
+}
+
+/* Product cards */
+.prod-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 8px;
+  transition: border-color .15s;
+}
+.prod-card:hover { border-color: var(--border2); }
+.prod-card.vendido { opacity: 0.5; }
+.prod-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.prod-name { font-size: 14px; font-weight: 500; }
+.prod-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.prod-price { font-size: 16px; font-weight: 500; font-family: 'DM Mono', monospace; text-align: right; white-space: nowrap; }
+.prod-margin { font-size: 12px; text-align: right; font-family: 'DM Mono', monospace; margin-top: 2px; }
+.prod-cost { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+.prod-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-sm {
+  background: none;
+  border: 0.5px solid var(--border2);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text2);
+  transition: all .15s;
+}
+.btn-sm:hover { background: var(--bg3); color: var(--text); }
+.btn-sm.green { color: var(--green); border-color: rgba(74,222,128,.25); }
+.btn-sm.red { color: var(--red); border-color: rgba(248,113,113,.25); }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.badge.ok { background: var(--green-bg); color: var(--green); }
+.badge.warn { background: var(--amber-bg); color: var(--amber); }
+.badge.low { background: var(--red-bg); color: var(--red); }
+.badge.sold { background: var(--bg3); color: var(--text3); }
+
+/* Form */
+.form-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.form-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 14px; }
+.form-row { margin-bottom: 10px; }
+.form-row label { display: block; font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+.form-row input {
+  width: 100%;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color .15s;
+  outline: none;
+}
+.form-row input:focus { border-color: var(--border2); }
+.form-row input::placeholder { color: var(--text3); }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+
+/* Calc preview */
+.calc-box {
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 10px 0;
+  display: none;
+}
+.calc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text3); padding: 3px 0; }
+.calc-total {
+  display: flex; justify-content: space-between;
+  font-size: 13px; font-weight: 500; color: var(--text);
+  border-top: 0.5px solid var(--border);
+  margin-top: 6px; padding-top: 8px;
+}
+.margin-tag {
+  display: none;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  font-family: 'DM Mono', monospace;
+}
+.margin-tag.good { background: var(--green-bg); color: var(--green); }
+.margin-tag.ok { background: var(--amber-bg); color: var(--amber); }
+.margin-tag.bad { background: var(--red-bg); color: var(--red); }
+
+/* Primary button */
+.btn-primary {
+  width: 100%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-primary:hover { opacity: .85; }
+
+.empty { text-align: center; padding: 2rem; color: var(--text3); font-size: 14px; }
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(14,14,14,.92);
+  backdrop-filter: blur(12px);
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.bnav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px 0 16px;
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: color .15s;
+}
+.bnav-btn.active { color: var(--accent); }
+.bnav-icon { font-size: 18px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">mi<span>stock</span></div>
+      <div class="dolar-chip">
+        <div class="dolar-dot"></div>
+        <span id="dolar-display">cargando...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-resumen" class="section active"></div>
+  <div id="sec-stock" class="section"></div>
+  <div id="sec-agregar" class="section">
+    <div class="form-card">
+      <div class="form-title">Datos del producto</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Marca</label><input id="f-marca" placeholder="Bape, Supreme..."></div>
+        <div class="form-row"><label>Producto</label><input id="f-prod" placeholder="Buzo, remera..."></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Talle</label><input id="f-talle" placeholder="S, M, XL..."></div>
+        <div class="form-row"><label>Color</label><input id="f-color" placeholder="Negro, gris..."></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-title">Costos</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Compra (USD)</label><input id="f-compra" type="number" placeholder="0.00" step="0.01" oninput="updateCalc()"></div>
+        <div class="form-row"><label>Envío (USD)</label><input id="f-envio" type="number" placeholder="0.00" step="0.01" oninput="updateCalc()"></div>
+      </div>
+      <div class="form-row"><label>Impuestos ($ pesos)</label><input id="f-imp" type="number" placeholder="0" oninput="updateCalc()"></div>
+      <div class="calc-box" id="calc-preview">
+        <div class="calc-row"><span>Compra</span><span id="cp-compra">-</span></div>
+        <div class="calc-row"><span>Envío</span><span id="cp-envio">-</span></div>
+        <div class="calc-row"><span>Impuestos</span><span id="cp-imp">-</span></div>
+        <div class="calc-total"><span>Costo total</span><span id="cp-total">-</span></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-title">Precio de venta</div>
+      <div class="form-row"><label>Precio venta ($ pesos)</label><input id="f-venta" type="number" placeholder="0" oninput="updateCalc()"></div>
+      <div class="margin-tag" id="margin-preview"></div>
+      <button class="btn-primary" onclick="agregarProducto()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bnav-btn active" id="bnav-resumen" onclick="showSection('resumen')">
+    <span class="bnav-icon">◈</span>Resumen
+  </button>
+  <button class="bnav-btn" id="bnav-stock" onclick="showSection('stock')">
+    <span class="bnav-icon">≡</span>Stock
+  </button>
+  <button class="bnav-btn" id="bnav-agregar" onclick="showSection('agregar')">
+    <span class="bnav-icon">+</span>Agregar
+  </button>
+</div>
+
+<script>
+const STORAGE_KEY = 'mistock_v1';
+let dolarTarjeta = 1680;
+let productos = [];
+let filtroMarca = 'todos';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      productos = parsed.productos || defaultData();
+    } else {
+      productos = defaultData();
+    }
+  } catch(e) { productos = defaultData(); }
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({productos})); } catch(e) {}
+}
+
+function defaultData() {
+  return [
+    {id:1,marca:'Denim Tears',prod:'Buzo camuflado',talle:'M',color:'Rosa',compraUSD:15,envioUSD:6.67,impPesos:0,ventaPesos:100000,vendido:false},
+    {id:2,marca:'Supreme',prod:'Remera',talle:'M',color:'Negro',compraUSD:5.48,envioUSD:3.2,impPesos:0,ventaPesos:50000,vendido:false},
+    {id:3,marca:'Bape',prod:'Zip doble',talle:'XXL',color:'Negro',compraUSD:16.57,envioUSD:7.63,impPesos:0,ventaPesos:130000,vendido:false},
+    {id:4,marca:'Bape',prod:'Buzo',talle:'M',color:'Blanco',compraUSD:18,envioUSD:8,impPesos:10000,ventaPesos:100000,vendido:false},
+    {id:5,marca:'Essentials',prod:'Buzo',talle:'XS',color:'Beige',compraUSD:12.63,envioUSD:5.61,impPesos:0,ventaPesos:100000,vendido:false},
+    {id:6,marca:'Spider',prod:'Buzo',talle:'M',color:'Gris',compraUSD:12.31,envioUSD:5.47,impPesos:0,ventaPesos:100000,vendido:false},
+    {id:7,marca:'Chrome Hearts',prod:'Bermuda',talle:'L',color:'Negro',compraUSD:21.32,envioUSD:12.45,impPesos:0,ventaPesos:80000,vendido:false},
+    {id:8,marca:'Corteiz',prod:'Remera',talle:'M',color:'Negra',compraUSD:7.11,envioUSD:3.16,impPesos:0,ventaPesos:40000,vendido:false},
+    {id:9,marca:'Acne Studios',prod:'Remera',talle:'M',color:'Negra',compraUSD:12.63,envioUSD:5.63,impPesos:0,ventaPesos:65000,vendido:false},
+    {id:10,marca:'Vale',prod:'Remera',talle:'L',color:'Gris',compraUSD:9.16,envioUSD:4.07,impPesos:0,ventaPesos:60000,vendido:false},
+    {id:11,marca:'Spider',prod:'Buzo',talle:'M',color:'Negro',compraUSD:18.71,envioUSD:10,impPesos:0,ventaPesos:80000,vendido:false},
+    {id:12,marca:'Denim Tears',prod:'Buzo camuflado',talle:'M',color:'Verde',compraUSD:14.13,envioUSD:8.24,impPesos:0,ventaPesos:85000,vendido:false},
+    {id:13,marca:'Essentials',prod:'Remera',talle:'S',color:'Gris',compraUSD:8.63,envioUSD:3.84,impPesos:0,ventaPesos:50000,vendido:false},
+    {id:14,marca:'Bape',prod:'Zip',talle:'XXL',color:'Negro',compraUSD:15,envioUSD:6.67,impPesos:0,ventaPesos:110000,vendido:false},
+    {id:15,marca:'Chrome Hearts',prod:'Beanie',talle:'U',color:'Negro',compraUSD:2.45,envioUSD:1.09,impPesos:0,ventaPesos:20000,vendido:false},
+    {id:16,marca:'Denim Tears',prod:'Jogging',talle:'M',color:'Gris',compraUSD:15,envioUSD:6.67,impPesos:0,ventaPesos:95000,vendido:false},
+    {id:17,marca:'Essentials',prod:'Short',talle:'S',color:'Gris',compraUSD:11,envioUSD:4.89,impPesos:0,ventaPesos:55000,vendido:false},
+    {id:18,marca:'Spider',prod:'Buzo',talle:'M',color:'Negro',compraUSD:19.73,envioUSD:8.77,impPesos:0,ventaPesos:100000,vendido:false},
+    {id:19,marca:'EE',prod:'Short',talle:'XL',color:'Camuflado',compraUSD:4.93,envioUSD:2.19,impPesos:0,ventaPesos:38000,vendido:false},
+    {id:20,marca:'EE',prod:'Short',talle:'XL',color:'Rosa',compraUSD:3.32,envioUSD:1.48,impPesos:0,ventaPesos:38000,vendido:false},
+    {id:21,marca:'Vale',prod:'Remera',talle:'M',color:'Negra',compraUSD:9.16,envioUSD:4.07,impPesos:0,ventaPesos:60000,vendido:false},
+  ];
+}
+
+async function fetchDolar() {
+  try {
+    const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const data = await r.json();
+    const oficial = data.rates.ARS || 1050;
+    dolarTarjeta = Math.round(oficial * 1.6);
+  } catch(e) { dolarTarjeta = 1680; }
+  document.getElementById('dolar-display').textContent = '$' + dolarTarjeta.toLocaleString('es-AR');
+  renderAll();
+}
+
+function costoTotal(p) {
+  return (p.compraUSD + p.envioUSD) * dolarTarjeta + (p.impPesos || 0);
+}
+function margen(p) {
+  const c = costoTotal(p);
+  if (!p.ventaPesos || p.ventaPesos <= 0) return null;
+  return ((p.ventaPesos - c) / p.ventaPesos) * 100;
+}
+function ganancia(p) { return p.ventaPesos - costoTotal(p); }
+function fmtPesos(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+
+function showSection(s) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + s).classList.add('active');
+  document.getElementById('bnav-' + s).classList.add('active');
+  if (s === 'resumen') renderResumen();
+  if (s === 'stock') renderStock();
+}
+
+function renderAll() { renderResumen(); renderStock(); }
+
+function renderResumen() {
+  const activos = productos.filter(p => !p.vendido);
+  const vendidos = productos.filter(p => p.vendido);
+  const ganTotal = activos.reduce((a,p) => a + ganancia(p), 0);
+  const invTotal = activos.reduce((a,p) => a + costoTotal(p), 0);
+  const ventaTotal = activos.reduce((a,p) => a + p.ventaPesos, 0);
+  const ganVendidos = vendidos.reduce((a,p) => a + ganancia(p), 0);
+  const margenes = activos.filter(p => p.ventaPesos > 0).map(p => margen(p));
+  const margenProm = margenes.length ? margenes.reduce((a,b)=>a+b,0)/margenes.length : 0;
+
+  const marcas = {};
+  activos.forEach(p => {
+    if (!marcas[p.marca]) marcas[p.marca] = {gan:0,count:0};
+    marcas[p.marca].gan += ganancia(p);
+    marcas[p.marca].count++;
+  });
+  const topMarcas = Object.entries(marcas).sort((a,b)=>b[1].gan-a[1].gan).slice(0,5);
+
+  document.getElementById('sec-resumen').innerHTML = `
+    <div style="padding:0 16px">
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-label">En stock</div><div class="metric-value">${activos.length}</div><div class="metric-sub">${vendidos.length} vendidos</div></div>
+        <div class="metric green"><div class="metric-label">Margen prom.</div><div class="metric-value">${margenProm.toFixed(1)}%</div><div class="metric-sub">sobre venta</div></div>
+        <div class="metric green"><div class="metric-label">Ganancia potencial</div><div class="metric-value">${fmtPesos(ganTotal)}</div><div class="metric-sub">si vendés todo</div></div>
+        <div class="metric blue"><div class="metric-label">Ya ganaste</div><div class="metric-value">${fmtPesos(ganVendidos)}</div><div class="metric-sub">de lo vendido</div></div>
+      </div>
+      <div class="metric-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+        <div class="metric"><div class="metric-label">Invertido</div><div class="metric-value" style="font-size:16px">${fmtPesos(invTotal)}</div></div>
+        <div class="metric"><div class="metric-label">Venta potencial</div><div class="metric-value" style="font-size:16px">${fmtPesos(ventaTotal)}</div></div>
+      </div>
+      <div class="sec-label" style="margin-top:20px">Top marcas</div>
+      ${topMarcas.map(([marca,d]) => `
+        <div class="brand-card">
+          <div>
+            <div class="brand-name">${marca}</div>
+            <div class="brand-count">${d.count} ítem${d.count>1?'s':''} en stock</div>
+          </div>
+          <div>
+            <div class="brand-gain">${fmtPesos(d.gan)}</div>
+            <div class="brand-sub">ganancia pot.</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function getMarcas() {
+  return ['todos', ...new Set(productos.map(p => p.marca))];
+}
+
+function renderStock() {
+  const marcas = getMarcas();
+  let lista = filtroMarca === 'todos' ? productos : productos.filter(p => p.marca === filtroMarca);
+
+  const chips = marcas.map(m => `<button class="chip ${m===filtroMarca?'active':''}" onclick="setFiltro('${m.replace(/'/g,"\\'")}')">${m === 'todos' ? 'Todos' : m}</button>`).join('');
+
+  const items = lista.length === 0
+    ? '<div class="empty">Sin productos</div>'
+    : lista.map(p => {
+        const m = margen(p);
+        const g = ganancia(p);
+        const mColor = m !== null ? (m >= 75 ? 'var(--green)' : m >= 65 ? 'var(--amber)' : 'var(--red)') : 'var(--text3)';
+        const badgeHtml = p.vendido
+          ? '<span class="badge sold">Vendido</span>'
+          : m !== null
+            ? (m >= 75 ? '<span class="badge ok">Buen margen</span>' : m < 65 ? '<span class="badge low">Margen bajo</span>' : '<span class="badge warn">Margen ok</span>')
+            : '';
+        return `
+          <div class="prod-card ${p.vendido?'vendido':''}">
+            <div class="prod-top">
+              <div>
+                <div class="prod-name">${p.marca} ${badgeHtml}</div>
+                <div class="prod-meta">${p.prod} · ${p.talle} · ${p.color}</div>
+              </div>
+              <div>
+                <div class="prod-price">${fmtPesos(p.ventaPesos)}</div>
+                ${m !== null ? `<div class="prod-margin" style="color:${mColor}">${m.toFixed(1)}% · ${fmtPesos(g)}</div>` : ''}
+              </div>
+            </div>
+            <div class="prod-cost">Costo: ${fmtPesos(costoTotal(p))}</div>
+            <div class="prod-actions">
+              ${!p.vendido
+                ? `<button class="btn-sm green" onclick="toggleVendido(${p.id})">Marcar vendido</button>`
+                : `<button class="btn-sm" onclick="toggleVendido(${p.id})">Restaurar</button>`}
+              <button class="btn-sm red" onclick="eliminar(${p.id})">Eliminar</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  document.getElementById('sec-stock').innerHTML = `
+    <div style="padding:0 16px">
+      <div class="filter-bar">${chips}</div>
+      ${items}
+    </div>
+  `;
+}
+
+function setFiltro(m) { filtroMarca = m; renderStock(); }
+
+function updateCalc() {
+  const d = dolarTarjeta;
+  const compraUSD = parseFloat(document.getElementById('f-compra').value) || 0;
+  const envioUSD = parseFloat(document.getElementById('f-envio').value) || 0;
+  const imp = parseFloat(document.getElementById('f-imp').value) || 0;
+  const venta = parseFloat(document.getElementById('f-venta').value) || 0;
+  const compraPesos = compraUSD * d;
+  const envioPesos = envioUSD * d;
+  const total = compraPesos + envioPesos + imp;
+
+  const preview = document.getElementById('calc-preview');
+  if (compraUSD > 0 || envioUSD > 0 || imp > 0) {
+    preview.style.display = 'block';
+    document.getElementById('cp-compra').textContent = fmtPesos(compraPesos);
+    document.getElementById('cp-envio').textContent = fmtPesos(envioPesos);
+    document.getElementById('cp-imp').textContent = fmtPesos(imp);
+    document.getElementById('cp-total').textContent = fmtPesos(total);
+  } else {
+    preview.style.display = 'none';
+  }
+
+  const mt = document.getElementById('margin-preview');
+  if (venta > 0 && total > 0) {
+    const m = ((venta - total) / venta) * 100;
+    const g = venta - total;
+    mt.style.display = 'block';
+    mt.className = 'margin-tag ' + (m >= 75 ? 'good' : m >= 65 ? 'ok' : 'bad');
+    mt.textContent = m.toFixed(1) + '% margen · ' + fmtPesos(g) + ' de ganancia';
+  } else {
+    mt.style.display = 'none';
+  }
+}
+
+function agregarProducto() {
+  const marca = document.getElementById('f-marca').value.trim();
+  const prod = document.getElementById('f-prod').value.trim();
+  if (!marca || !prod) { alert('Completá al menos marca y producto'); return; }
+  productos.push({
+    id: Date.now(),
+    marca, prod,
+    talle: document.getElementById('f-talle').value.trim() || '-',
+    color: document.getElementById('f-color').value.trim() || '-',
+    compraUSD: parseFloat(document.getElementById('f-compra').value) || 0,
+    envioUSD: parseFloat(document.getElementById('f-envio').value) || 0,
+    impPesos: parseFloat(document.getElementById('f-imp').value) || 0,
+    ventaPesos: parseFloat(document.getElementById('f-venta').value) || 0,
+    vendido: false,
+  });
+  saveData();
+  ['f-marca','f-prod','f-talle','f-color','f-compra','f-envio','f-imp','f-venta'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('calc-preview').style.display = 'none';
+  document.getElementById('margin-preview').style.display = 'none';
+  alert('Producto guardado!');
+  renderAll();
+}
+
+function toggleVendido(id) {
+  const p = productos.find(x => x.id === id);
+  if (p) { p.vendido = !p.vendido; saveData(); renderAll(); renderStock(); }
+}
+
+function eliminar(id) {
+  if (!confirm('Eliminar este producto?')) return;
+  productos = productos.filter(p => p.id !== id);
+  saveData();
+  renderAll();
+  renderStock();
+}
+
+loadData();
+renderAll();
+fetchDolar();
+</script>
+</body>
+</html>
